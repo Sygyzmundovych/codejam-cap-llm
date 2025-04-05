@@ -4,6 +4,7 @@ ORG="Developer Advocates Free Tier_cap-ai-codejam-op6zhda1"
 SPACE="CodeJam-Dev"
 ROLE="SpaceDeveloper"
 SUBACCOUNT="6088766d-dcc4-4e56-972f-652baad796be"
+GLOBAL_ACCOUNT="sap-developer-advocates-free-tier"
 
 email_regex="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 
@@ -56,8 +57,16 @@ while IFS= read -r email || [[ -n "$email" ]]; do
       echo "   ❌ Failed to delete user from BTP subaccount: $email"
     fi
 
+    echo "6️⃣  Deleting user from BTP global account..."
+    if btp delete security/user "$email" --global-account "$GLOBAL_ACCOUNT"; then
+      echo "   ✅ User successfully deleted from BTP global account."
+    else
+      echo "   ❌ Failed to delete user from BTP global account: $email"
+    fi
+
   else
     echo "❌ Invalid email: $email"
   fi
 
 done
+echo -e "\n✅  Cleanup completed."
