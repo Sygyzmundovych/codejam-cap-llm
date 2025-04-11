@@ -24,7 +24,7 @@ if ! cf org-users "$ORG" -a | tail -n +2 | grep "@" | sort | uniq > all_org_user
 fi
 
 # Print users who are not privileged users
-if ! comm -23 all_org_users.txt privileged_users.txt; then
+if ! comm -23 all_org_users.txt privileged_users.txt | awk '{print $1}'; then
     echo "Error: Failed to compare user lists for org $ORG" >&2
     exit 1
 fi
