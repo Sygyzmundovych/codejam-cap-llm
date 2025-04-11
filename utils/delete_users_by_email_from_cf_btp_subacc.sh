@@ -8,8 +8,7 @@ ROLE="SpaceDeveloper"
 SUBACCOUNT="6088766d-dcc4-4e56-972f-652baad796be"
 GLOBAL_ACCOUNT="sap-developer-advocates-free-tier"
 
-# Improved email regex
-email_regex="^[a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+email_regex="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 
 while IFS= read -r email || [[ -n "$email" ]]; do
   # Trim whitespace (including newlines)
