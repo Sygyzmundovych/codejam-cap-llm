@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -uo pipefail
 
 ORG="Developer Advocates Free Tier_cap-ai-codejam-op6zhda1"
 SPACE="CodeJam-Dev"
@@ -6,7 +8,8 @@ ROLE="SpaceDeveloper"
 SUBACCOUNT="6088766d-dcc4-4e56-972f-652baad796be"
 GLOBAL_ACCOUNT="sap-developer-advocates-free-tier"
 
-email_regex="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+# Improved email regex
+email_regex="^[a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 
 while IFS= read -r email || [[ -n "$email" ]]; do
   # Trim whitespace (including newlines)
@@ -19,7 +22,9 @@ while IFS= read -r email || [[ -n "$email" ]]; do
       echo "   🔍 User found in Cloud Foundry org. Proceeding with cleanup..."
 
       echo "1️⃣  Unsetting space role..."
-      cf unset-space-role "$email" "$ORG" "$SPACE" "$ROLE"
+      if ! cf unset-space-role "$email" "$ORG" "$SPACE" "$ROLE"; then
+        echo "   ❌ Failed to unset space role for $email"
+      fi
 
       echo "2️⃣  Getting user GUID..."
       user_guid=$(cf curl "/v3/users?usernames=$email" | jq -r '.resources[0].guid')
@@ -32,7 +37,9 @@ while IFS= read -r email || [[ -n "$email" ]]; do
 
         if [[ -n "$role_guid" ]]; then
           echo "   🧹 Removing role assignment: $role_guid"
-          cf curl -X DELETE "/v3/roles/$role_guid"
+          if ! cf curl -X DELETE "/v3/roles/$role_guid"; then
+            echo "   ❌ Failed to remove role assignment for $email"
+          fi
         else
           echo "   ⚠️  No organization_user role found for user."
         fi
@@ -51,17 +58,17 @@ while IFS= read -r email || [[ -n "$email" ]]; do
     fi
 
     echo "5️⃣  Deleting user from BTP subaccount..."
-    if btp delete security/user "$email" --subaccount "$SUBACCOUNT"; then
-      echo "   ✅ User successfully deleted from BTP subaccount."
-    else
+    if ! btp delete security/user "$email" --subaccount "$SUBACCOUNT"; then
       echo "   ❌ Failed to delete user from BTP subaccount: $email"
+    else
+      echo "   ✅ User successfully deleted from BTP subaccount."
     fi
 
     echo "6️⃣  Deleting user from BTP global account..."
-    if btp delete security/user "$email" --global-account "$GLOBAL_ACCOUNT"; then
-      echo "   ✅ User successfully deleted from BTP global account."
-    else
+    if ! btp delete security/user "$email" --global-account "$GLOBAL_ACCOUNT"; then
       echo "   ❌ Failed to delete user from BTP global account: $email"
+    else
+      echo "   ✅ User successfully deleted from BTP global account."
     fi
 
   else
