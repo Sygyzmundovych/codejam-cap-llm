@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
+# Check if BTP CLI is logged in
+if btp --info | grep -q "You are currently not logged in."; then
+  echo "Error: Not logged in to BTP CLI. Please log in and try again."
+  exit 1
+fi
 
 set -uo pipefail
 
-ORG="Developer Advocates Free Tier_cap-ai-codejam-op6zhda1"
-SPACE="CodeJam-Dev"
+ORG="Developer Advocates Free Tier_cap-codejam-2xnpct8z"
+SPACE="dev"
 ROLE="SpaceDeveloper"
-SUBACCOUNT="6088766d-dcc4-4e56-972f-652baad796be"
+SUBACCOUNT="13f4f274-4515-4c67-8274-cbde80a4e744"
 GLOBAL_ACCOUNT="sap-developer-advocates-free-tier"
 
 email_regex="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
@@ -17,13 +22,18 @@ while IFS= read -r email || [[ -n "$email" ]]; do
   if [[ "$email" =~ $email_regex ]]; then
     echo -e "\n➡️  Processing: $email"
 
-    if cf org-users "$ORG" -a | grep -q "$email"; then
+    if cf org-users "$ORG" -a | grep "$email"; then
       echo "   🔍 User found in Cloud Foundry org. Proceeding with cleanup..."
 
-      echo "1️⃣  Unsetting space role..."
-      if ! cf unset-space-role "$email" "$ORG" "$SPACE" "$ROLE"; then
-        echo "   ❌ Failed to unset space role for $email"
-      fi
+      echo "1️⃣  Unsetting space roles..."
+      for role in SpaceDeveloper SpaceManager SpaceAuditor SpaceSupporter; do
+        echo "   🔄 Attempting to unset role: $role"
+        if ! cf unset-space-role "$email" "$ORG" "$SPACE" "$role"; then
+          echo "   ❌ Failed to unset space role $role for $email"
+        else
+          echo "   ✅ Successfully unset space role $role for $email"
+        fi
+      done
 
       echo "2️⃣  Getting user GUID..."
       user_guid=$(cf curl "/v3/users?usernames=$email" | jq -r '.resources[0].guid')
