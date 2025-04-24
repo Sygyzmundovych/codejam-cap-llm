@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Check if BTP CLI is logged in
 if btp --info | grep -q "You are currently not logged in."; then
   echo "Error: Not logged in to BTP CLI. Please log in and try again."
