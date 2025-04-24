@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+set -uo pipefail
+
+# Check if logged in to Cloud Foundry
+if ! cf target &>/dev/null; then
+    echo "Error: Not logged in to Cloud Foundry. Please log in using 'cf login' and try again."
+    exit 1
+fi
+
 cf target | grep -E 'org:|space:' && echo "space_guid: $(cf space $(cf target | grep 'space:' | awk '{print $2}') --guid)"
 
 space_guid=$(cf space $(cf target | grep 'space:' | awk '{print $2}') --guid)
