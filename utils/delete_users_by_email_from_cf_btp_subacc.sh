@@ -5,6 +5,12 @@ if btp --info | grep -q "You are currently not logged in."; then
   exit 1
 fi
 
+# Check if logged in to Cloud Foundry
+if ! cf target &>/dev/null; then
+    echo "Error: Not logged in to Cloud Foundry. Please log in using 'cf login' and try again."
+    exit 1
+fi
+
 set -uo pipefail
 
 ORG="Developer Advocates Free Tier_cap-codejam-2xnpct8z"

@@ -6,6 +6,12 @@
 # Usage: ./script_name.sh [org_name]
 # If org_name is not provided, it defaults to 'Developer Advocates Free Tier_cap-ai-codejam-op6zhda1'
 
+# Check if logged in to Cloud Foundry
+if ! cf target &>/dev/null; then
+    echo "Error: Not logged in to Cloud Foundry. Please log in using 'cf login' and try again."
+    exit 1
+fi
+
 set -euo pipefail
 
 # Get ORG from parameter or use default
